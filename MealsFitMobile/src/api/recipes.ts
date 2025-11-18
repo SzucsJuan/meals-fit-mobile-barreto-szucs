@@ -1,29 +1,53 @@
 import { apiFetch } from "./client";
 
+export type Ingredient = {
+  id: number;
+  name?: string;
+  ingredient_name?: string;
+  pivot?: {
+    quantity?: number;
+    unit?: string;
+    grams?: number;
+  };
+  quantity?: number;
+  unit?: string;
+};
+
 export type Recipe = {
   id: number;
   title: string;
-  description: string | null;
-  image_disk: string | null;
-  image_path: string | null;
-  image_thumb_path: string | null;
-  image_webp_path: string | null;
-  image_width: number | null;
-  image_height: number | null;
+  description?: string;
+  image_url?: string;
+  image_thumb_url?: string;
+  image_webp_url?: string;
+  user_id: number;
 
-  servings: number;
-  calories: number;
-  protein: number;
-  carbs: number;
-  fat: number;
-  prep_time_minutes: number | null;
-  cook_time_minutes: number | null;
-  avg_rating?: number | null;
-  votes_count?: number;
-  favorited_by_count?: number;
-  user?: { id: number; name: string };
+  calories?: number;
+  protein?: number;
+  carbs?: number;
+  fat?: number;
+  servings?: number;
+  prep_time_minutes?: number;
+  cook_time_minutes?: number;
+
+  steps?: string;
+  ingredients?: Ingredient[];
 };
 
-export async function listRecipes(): Promise<Recipe[]> {
-  return apiFetch<Recipe[]>("/recipes", { method: "GET" });
+type Paginated<T> = {
+  current_page: number;
+  data: T[];
+};
+
+export async function listMyRecipes(userId?: number): Promise<Recipe[]> {
+  if (!userId) return [];
+
+  const res = await apiFetch<Paginated<Recipe>>("/recipes", {
+    method: "GET",
+  });
+
+  // console.log("API /recipes RESPONSE:", res);
+
+  const all = res.data ?? [];
+  return all.filter((r) => r.user_id === userId);
 }
