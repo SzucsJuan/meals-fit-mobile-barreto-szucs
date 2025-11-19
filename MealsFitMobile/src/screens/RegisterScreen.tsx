@@ -1,3 +1,4 @@
+// src/screens/RegisterScreen.tsx
 import React, { useState } from "react";
 import {
   View,
@@ -14,13 +15,13 @@ import {
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
-import { login } from "../api/auth";
+import { register, RegisterInput } from "../api/auth";
 import type { AuthStackParamList } from "../navigation/AppNavigator";
 
-type Nav = NativeStackNavigationProp<AuthStackParamList, "Login">;
+type Nav = NativeStackNavigationProp<AuthStackParamList, "Register">;
 
 const COLORS = {
-  bg: "#F8F5F0",
+  bg: "#F8F5F0", 
   card: "#FFFFFF",
   border: "#E5E7EB",
   text: "#1F2937",
@@ -31,11 +32,13 @@ const COLORS = {
   link: "#16A34A",
 };
 
-export default function LoginScreen() {
+export default function RegisterScreen() {
   const navigation = useNavigation<Nav>();
 
+  const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [password2, setPassword2] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
@@ -44,27 +47,48 @@ export default function LoginScreen() {
   const onSubmit = async () => {
     setError(null);
 
-    if (!email.trim() || !password) {
-      setError("Please enter your email and password.");
+    if (!name.trim() || !email.trim() || !password || !password2) {
+      setError("Please complete all fields.");
+      return;
+    }
+    if (password.length < 8) {
+      setError("Password must be at least 8 characters long.");
+      return;
+    }
+    if (password !== password2) {
+      setError("Passwords must match.");
       return;
     }
 
     setLoading(true);
     try {
-      const user = await login(email.trim(), password);
-      console.log("Sign in OK", user);
+      const payload: RegisterInput = {
+        name: name.trim(),
+        email: email.trim(),
+        password,
+        password_confirmation: password2,
+      };
+
+      await register(payload);
+      alert("Account created successfully. Please sign in.");
+      navigation.navigate("Login");
     } catch (e: any) {
-      console.error("SIGN IN FAILED", e);
-      setError(e.message || "Sign in error");
+      console.error("REGISTER FAILED", e);
+      const msg =
+        e?.message ||
+        e?.response?.data?.message ||
+        "Error creating account. Please try again.";
+      setError(msg);
     } finally {
       setLoading(false);
     }
   };
 
-  const disabled = loading || !email.trim() || !password;
+  const disabled =
+    loading || !name.trim() || !email.trim() || !password || !password2;
 
-  const goToRegister = () => {
-    navigation.navigate("Register");
+  const goToLogin = () => {
+    navigation.navigate("Login");
   };
 
   return (
@@ -76,24 +100,36 @@ export default function LoginScreen() {
         <View style={styles.root}>
           <View style={styles.centerWrapper}>
             <View style={styles.card}>
-              {/* encabezado */}
+              {/* Encabezado */}
               <View style={styles.header}>
                 <Image source={logo} style={styles.logo} />
-                <Text style={styles.title}>Sign in to Meals&Fit</Text>
+                <Text style={styles.title}>Create your account</Text>
                 <View style={styles.subtitleRow}>
-                  <Text style={styles.subtitle}>New here? </Text>
-                  <TouchableOpacity onPress={goToRegister}>
-                    <Text style={styles.link}>Create an account</Text>
+                  <Text style={styles.subtitle}>Already have an account? </Text>
+                  <TouchableOpacity onPress={goToLogin}>
+                    <Text style={styles.link}>Sign in</Text>
                   </TouchableOpacity>
                 </View>
               </View>
 
-              {/* formulario */}
+              {/* Formulario */}
               <View style={styles.form}>
-                <Text style={styles.label}>Email</Text>
+                <Text style={styles.sectionTitle}>Get started for free</Text>
+
+                <Text style={[styles.label, { marginTop: 16 }]}>Full name</Text>
                 <TextInput
                   style={styles.input}
-                  placeholder="example@email.com"
+                  placeholder="Your name"
+                  placeholderTextColor={COLORS.muted}
+                  value={name}
+                  onChangeText={setName}
+                  returnKeyType="next"
+                />
+
+                <Text style={[styles.label, { marginTop: 12 }]}>Email</Text>
+                <TextInput
+                  style={styles.input}
+                  placeholder="name@example.com"
                   placeholderTextColor={COLORS.muted}
                   autoCapitalize="none"
                   autoCorrect={false}
@@ -103,17 +139,34 @@ export default function LoginScreen() {
                   returnKeyType="next"
                 />
 
-                <Text style={[styles.label, { marginTop: 16 }]}>Password</Text>
+                <Text style={[styles.label, { marginTop: 12 }]}>Password</Text>
                 <TextInput
                   style={styles.input}
-                  placeholder="••••••••"
+                  placeholder="Create a strong password"
                   placeholderTextColor={COLORS.muted}
                   secureTextEntry
                   value={password}
                   onChangeText={setPassword}
+                  returnKeyType="next"
+                />
+                <Text style={styles.helperText}>
+                  Must be at least 8 characters long.
+                </Text>
+
+                <Text style={[styles.label, { marginTop: 12 }]}>
+                  Confirm password
+                </Text>
+                <TextInput
+                  style={styles.input}
+                  placeholder="Confirm your password"
+                  placeholderTextColor={COLORS.muted}
+                  secureTextEntry
+                  value={password2}
+                  onChangeText={setPassword2}
                   returnKeyType="done"
                   onSubmitEditing={onSubmit}
                 />
+                <Text style={styles.helperText}>Passwords must match.</Text>
 
                 {error && <Text style={styles.error}>{error}</Text>}
 
@@ -125,14 +178,16 @@ export default function LoginScreen() {
                   {loading ? (
                     <ActivityIndicator color="#FFFFFF" />
                   ) : (
-                    <Text style={styles.buttonText}>Sign in</Text>
+                    <Text style={styles.buttonText}>Create account</Text>
                   )}
                 </TouchableOpacity>
               </View>
             </View>
 
             <Text style={styles.footerText}>
-              Meals&Fit · Nutrition and smart tracking
+              By creating an account, you agree to our{" "}
+              <Text style={styles.link}>Terms of Service</Text> and{" "}
+              <Text style={styles.link}>Privacy Policy</Text>.
             </Text>
           </View>
         </View>
@@ -192,12 +247,18 @@ const styles = StyleSheet.create({
     fontWeight: "600",
   },
   form: {
-    marginTop: 8,
+    marginTop: 4,
+  },
+  sectionTitle: {
+    fontSize: 15,
+    fontWeight: "600",
+    color: COLORS.text,
+    marginBottom: 4,
   },
   label: {
     fontSize: 13,
     color: COLORS.text,
-    marginBottom: 6,
+    marginBottom: 4,
   },
   input: {
     borderWidth: 1,
@@ -209,6 +270,11 @@ const styles = StyleSheet.create({
     backgroundColor: "#FFFFFF",
     fontSize: 14,
   },
+  helperText: {
+    fontSize: 11,
+    color: COLORS.muted,
+    marginTop: 4,
+  },
   error: {
     color: COLORS.error,
     marginTop: 10,
@@ -217,7 +283,7 @@ const styles = StyleSheet.create({
   button: {
     marginTop: 20,
     borderRadius: 10,
-    paddingVertical: 11,
+    paddingVertical: 12,
     alignItems: "center",
     backgroundColor: COLORS.primary,
   },
@@ -234,5 +300,6 @@ const styles = StyleSheet.create({
     fontSize: 11,
     color: COLORS.muted,
     textAlign: "center",
+    maxWidth: 420,
   },
 });

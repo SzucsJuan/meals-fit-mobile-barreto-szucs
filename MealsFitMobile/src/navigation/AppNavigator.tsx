@@ -4,6 +4,7 @@ import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { TouchableOpacity, Text } from "react-native";
 
 import LoginScreen from "../screens/LoginScreen";
+import RegisterScreen from "../screens/RegisterScreen";
 import RecipesScreen from "../screens/RecipesScreen";
 import RecipeDetailScreen from "../screens/RecipeDetailScreen";
 import CreateRecipeScreen from "../screens/CreateRecipeScreen";
@@ -13,6 +14,7 @@ import { Recipe } from "../api/recipes";
 
 export type AuthStackParamList = {
   Login: undefined;
+  Register: undefined;
 };
 
 export type AppStackParamList = {
@@ -21,10 +23,8 @@ export type AppStackParamList = {
   CreateRecipe: undefined;
 };
 
-
 const AuthStack = createNativeStackNavigator<AuthStackParamList>();
 const AppStack = createNativeStackNavigator<AppStackParamList>();
-
 
 function AuthNavigator() {
   return (
@@ -32,6 +32,11 @@ function AuthNavigator() {
       <AuthStack.Screen
         name="Login"
         component={LoginScreen}
+        options={{ headerShown: false }}
+      />
+      <AuthStack.Screen
+        name="Register"
+        component={RegisterScreen}
         options={{ headerShown: false }}
       />
     </AuthStack.Navigator>
