@@ -51,3 +51,37 @@ export async function listMyRecipes(userId?: number): Promise<Recipe[]> {
   const all = res.data ?? [];
   return all.filter((r) => r.user_id === userId);
 }
+
+
+export async function getRecipe(id: number): Promise<Recipe> {
+  return apiFetch<Recipe>(`/recipes/${id}`, { method: "GET" });
+}
+
+// ---------- CREATE RECIPE ----------
+
+export type CreateRecipeInput = {
+  title: string;
+  visibility: "public" | "private";
+  description: string;
+  prep_time_minutes: number | null;
+  cook_time_minutes: number | null;
+  servings: number | null;
+  ingredients: {
+    ingredient_id: number;
+    quantity: number;
+    unit: string | null;
+    notes: string | null;
+  }[];
+  steps: string;
+};
+
+export async function createRecipe(input: CreateRecipeInput) {
+  // En Laravel: Route::apiResource('recipes', RecipeController::class)->store
+  // y en el controlador validás estos campos como hacés desde web.
+  const res = await apiFetch<any>("/recipes", {
+    method: "POST",
+    body: JSON.stringify(input),
+  });
+
+  return res;
+}

@@ -24,18 +24,18 @@ export default function LoginScreen() {
     setError(null);
 
     if (!email.trim() || !password) {
-      setError("Por favor completá email y contraseña.");
+      setError("Please enter your email and password.");
       return;
     }
 
     setLoading(true);
     try {
       const user = await login(email.trim(), password);
-      console.log("Login OK", user);
+      console.log("Sign in OK", user);
       // El cambio de pantalla lo maneja AppNavigator cuando detecta token
     } catch (e: any) {
-      console.error("Login FAILED", e);
-      setError(e.message || "Error al iniciar sesión");
+      console.error("SIGN IN FAILED", e);
+      setError(e.message || "Sign in error");
     } finally {
       setLoading(false);
     }
@@ -59,7 +59,7 @@ export default function LoginScreen() {
                 <Image source={logo} style={styles.logo} />
                 <Text style={styles.title}>Meals&Fit</Text>
                 <Text style={styles.subtitle}>
-                  Log in to continue with your plan.
+                  Sign in to continue with your plan.
                 </Text>
               </View>
 
@@ -102,7 +102,7 @@ export default function LoginScreen() {
                   {loading ? (
                     <ActivityIndicator color="#0f172a" />
                   ) : (
-                    <Text style={styles.buttonText}>Log in</Text>
+                    <Text style={styles.buttonText}>Sign in</Text>
                   )}
                 </TouchableOpacity>
               </View>

@@ -270,6 +270,14 @@ export default function RecipesScreen() {
       <Text style={styles.headerTitle}>My Recipes</Text>
       <Text style={styles.headerSubtitle}>Manage your recipes</Text>
 
+      <TouchableOpacity
+        style={styles.fab}
+        activeOpacity={0.8}
+        onPress={() => navigation.navigate("CreateRecipe")}
+      >
+        <Text style={styles.fabPlus}>+</Text>
+      </TouchableOpacity>
+
       <FlatList
         data={recipes}
         keyExtractor={(item) => String(item.id)}
@@ -471,5 +479,29 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: COLORS.textSecondary,
     marginTop: 2,
+  },
+
+  fab: {
+    position: "absolute",
+    bottom: 26,
+    right: 26,
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    backgroundColor: "#22C55E",
+    justifyContent: "center",
+    alignItems: "center",
+    shadowColor: "#000",
+    shadowOpacity: 0.28,
+    shadowOffset: { width: 0, height: 4 },
+    shadowRadius: 6,
+    elevation: 8,
+    zIndex: 50,
+  },
+  fabPlus: {
+    fontSize: 32,
+    color: "#FFF",
+    fontWeight: "700",
+    marginTop: -2,
   },
 });

@@ -6,6 +6,7 @@ import { TouchableOpacity, Text } from "react-native";
 import LoginScreen from "../screens/LoginScreen";
 import RecipesScreen from "../screens/RecipesScreen";
 import RecipeDetailScreen from "../screens/RecipeDetailScreen";
+import CreateRecipeScreen from "../screens/CreateRecipeScreen";
 import { useAuth } from "../store/auth";
 import { logoutApi } from "../api/auth";
 import { Recipe } from "../api/recipes";
@@ -17,11 +18,13 @@ export type AuthStackParamList = {
 export type AppStackParamList = {
   Recipes: undefined;
   RecipeDetail: { recipe: Recipe };
-  // Después podemos agregar otras: Goals, Profile, etc.
+  CreateRecipe: undefined;
 };
+
 
 const AuthStack = createNativeStackNavigator<AuthStackParamList>();
 const AppStack = createNativeStackNavigator<AppStackParamList>();
+
 
 function AuthNavigator() {
   return (
@@ -73,6 +76,11 @@ function AppStackNavigator() {
             </TouchableOpacity>
           ),
         }}
+      />
+      <AppStack.Screen
+        name="CreateRecipe"
+        component={CreateRecipeScreen}
+        options={{ headerShown: false }}
       />
       <AppStack.Screen
         name="RecipeDetail"

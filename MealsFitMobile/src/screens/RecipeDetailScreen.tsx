@@ -53,9 +53,9 @@ export default function RecipeDetailScreen() {
   const stepsText = (recipe.steps || "").trim();
   const steps = stepsText
     ? stepsText
-        .split(/\r?\n/)
-        .map((s) => s.trim())
-        .filter((s) => s.length > 0)
+      .split(/\r?\n/)
+      .map((s) => s.trim())
+      .filter((s) => s.length > 0)
     : [];
 
   const calories =
@@ -120,44 +120,44 @@ export default function RecipeDetailScreen() {
         protein !== null ||
         carbs !== null ||
         fat !== null) && (
-        <View style={styles.nutritionCard}>
-          <Text style={styles.nutritionTitle}>Nutrition Information</Text>
-          <Text style={styles.nutritionSubtitle}>
-            Total (recipe) – si querés por porción dividí por {recipe.servings ?? 1}
-          </Text>
+          <View style={styles.nutritionCard}>
+            <Text style={styles.nutritionTitle}>Nutrition Information</Text>
+            <Text style={styles.nutritionSubtitle}>
+              Total (recipe) – si querés por porción dividí por {recipe.servings ?? 1}
+            </Text>
 
-          <View style={styles.nutritionRow}>
-            {calories !== null && (
-              <View style={styles.nutritionItem}>
-                <Text style={[styles.nutritionNumber, styles.nutCalories]}>
-                  {calories}
-                </Text>
-                <Text style={styles.nutritionLabel}>Calories</Text>
-              </View>
-            )}
-            {protein !== null && (
-              <View style={styles.nutritionItem}>
-                <Text style={[styles.nutritionNumber, styles.nutProtein]}>
-                  {protein}g
-                </Text>
-                <Text style={styles.nutritionLabel}>Protein</Text>
-              </View>
-            )}
-            {carbs !== null && (
-              <View style={styles.nutritionItem}>
-                <Text style={styles.nutritionNumber}>{carbs}g</Text>
-                <Text style={styles.nutritionLabel}>Carbs</Text>
-              </View>
-            )}
-            {fat !== null && (
-              <View style={styles.nutritionItem}>
-                <Text style={styles.nutritionNumber}>{fat}g</Text>
-                <Text style={styles.nutritionLabel}>Fats</Text>
-              </View>
-            )}
+            <View style={styles.nutritionRow}>
+              {calories !== null && (
+                <View style={styles.nutritionItem}>
+                  <Text style={[styles.nutritionNumber, styles.nutCalories]}>
+                    {calories}
+                  </Text>
+                  <Text style={styles.nutritionLabel}>Calories</Text>
+                </View>
+              )}
+              {protein !== null && (
+                <View style={styles.nutritionItem}>
+                  <Text style={[styles.nutritionNumber, styles.nutProtein]}>
+                    {protein}g
+                  </Text>
+                  <Text style={styles.nutritionLabel}>Protein</Text>
+                </View>
+              )}
+              {carbs !== null && (
+                <View style={styles.nutritionItem}>
+                  <Text style={styles.nutritionNumber}>{carbs}g</Text>
+                  <Text style={styles.nutritionLabel}>Carbs</Text>
+                </View>
+              )}
+              {fat !== null && (
+                <View style={styles.nutritionItem}>
+                  <Text style={styles.nutritionNumber}>{fat}g</Text>
+                  <Text style={styles.nutritionLabel}>Fats</Text>
+                </View>
+              )}
+            </View>
           </View>
-        </View>
-      )}
+        )}
 
       {/* Ingredientes + Instrucciones (tarjetas) */}
       <View style={styles.bottomRow}>
@@ -187,9 +187,8 @@ export default function RecipeDetailScreen() {
             return (
               <Text key={ing.id ?? index} style={styles.bottomText}>
                 {qty != null
-                  ? `${qty.toFixed ? qty.toFixed(2) : qty}${
-                      unit ? ` ${unit}` : ""
-                    } – ${name}`
+                  ? `${qty.toFixed ? qty.toFixed(2) : qty}${unit ? ` ${unit}` : ""
+                  } – ${name}`
                   : name}
               </Text>
             );

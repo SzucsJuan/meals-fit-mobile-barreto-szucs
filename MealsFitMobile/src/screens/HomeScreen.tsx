@@ -8,17 +8,16 @@ import {
   RefreshControl,
   Button,
 } from "react-native";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { listRecipes, Recipe } from "../api/recipes";
+import { useQuery } from "@tanstack/react-query";
+import { listMyRecipes, Recipe } from "../api/recipes";
 import { API_BASE_URL } from "../config/env";
 import { logoutApi } from "../api/auth";
 
 export default function HomeScreen() {
-  const queryClient = useQueryClient();
 
   const { data, isLoading, error, refetch, isRefetching } = useQuery({
     queryKey: ["recipes"],
-    queryFn: listRecipes,
+    queryFn: () => listMyRecipes(),
   });
 
   const onRefresh = async () => {
@@ -26,8 +25,8 @@ export default function HomeScreen() {
   };
 
   const renderItem = ({ item }: { item: Recipe }) => {
-    const imageUrl = item.image_path
-      ? `${API_BASE_URL}/storage/${item.image_path}`
+    const imageUrl = item.image_url
+      ? `${API_BASE_URL}/storage/${item.image_url}`
       : null;
 
     return (
