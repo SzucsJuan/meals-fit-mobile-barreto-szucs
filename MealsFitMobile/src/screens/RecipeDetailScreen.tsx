@@ -1,17 +1,29 @@
-import React from "react";
+import React, { useCallback, useState } from "react";
 import {
   View,
   Text,
   StyleSheet,
   ScrollView,
   Image,
+  TouchableOpacity,
+  Alert,
 } from "react-native";
-import { RouteProp, useRoute } from "@react-navigation/native";
+import {
+  RouteProp,
+  useRoute,
+  useNavigation,
+} from "@react-navigation/native";
+import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
+import { useQueryClient } from "@tanstack/react-query";
+
 import { AppStackParamList } from "../navigation/AppNavigator";
 import { API_BASE_URL } from "../config/env";
 import { Recipe, Ingredient } from "../api/recipes";
+import { deleteRecipe } from "../api/recipes";
+import { ConfirmModal } from "../components/ConfirmModal";
 
 type Route = RouteProp<AppStackParamList, "RecipeDetail">;
+type Nav = NativeStackNavigationProp<AppStackParamList, "RecipeDetail">;
 
 const COLORS = {
   bg: "#F8F5F0",
@@ -22,8 +34,6 @@ const COLORS = {
   textSecondary: "#6B7280",
   green: "#22C55E",
   greenDark: "#16A34A",
-  badgePrivateBg: "#F3F4F6",
-  badgePrivateText: "#111827",
 };
 
 function resolveImageUrl(recipe: Recipe): string | undefined {
@@ -44,18 +54,21 @@ function resolveImageUrl(recipe: Recipe): string | undefined {
 
 export default function RecipeDetailScreen() {
   const route = useRoute<Route>();
+  const navigation = useNavigation<Nav>();
+  const queryClient = useQueryClient();
+
   const recipe = route.params.recipe as Recipe;
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
 
   const imageUrl = resolveImageUrl(recipe);
-
   const ingredients = (recipe.ingredients ?? []) as Ingredient[];
 
   const stepsText = (recipe.steps || "").trim();
   const steps = stepsText
     ? stepsText
-      .split(/\r?\n/)
-      .map((s) => s.trim())
-      .filter((s) => s.length > 0)
+        .split(/\r?\n/)
+        .map((s) => s.trim())
+        .filter((s) => s.length > 0)
     : [];
 
   const calories =
@@ -74,6 +87,24 @@ export default function RecipeDetailScreen() {
     recipe.fat !== undefined && recipe.fat !== null
       ? Math.round(recipe.fat)
       : null;
+
+  const handleDelete = useCallback(async () => {
+    try {
+      // Llamamos a la función de la API
+      await deleteRecipe(recipe.id);
+
+      // Refrescamos el listado de recetas
+      queryClient.invalidateQueries({ queryKey: ["my-recipes"] });
+
+      Alert.alert("Deleted", "Recipe deleted successfully.");
+      setShowDeleteModal(false);
+      navigation.goBack();
+    } catch (e) {
+      console.log("Delete error", e);
+      Alert.alert("Error", "Unexpected error deleting recipe.");
+      setShowDeleteModal(false);
+    }
+  }, [recipe.id, queryClient, navigation]);
 
   return (
     <ScrollView
@@ -120,44 +151,45 @@ export default function RecipeDetailScreen() {
         protein !== null ||
         carbs !== null ||
         fat !== null) && (
-          <View style={styles.nutritionCard}>
-            <Text style={styles.nutritionTitle}>Nutrition Information</Text>
-            <Text style={styles.nutritionSubtitle}>
-              Total (recipe) – si querés por porción dividí por {recipe.servings ?? 1}
-            </Text>
+        <View style={styles.nutritionCard}>
+          <Text style={styles.nutritionTitle}>Nutrition Information</Text>
+          <Text style={styles.nutritionSubtitle}>
+            Total (recipe) – si querés por porción dividí por{" "}
+            {recipe.servings ?? 1}
+          </Text>
 
-            <View style={styles.nutritionRow}>
-              {calories !== null && (
-                <View style={styles.nutritionItem}>
-                  <Text style={[styles.nutritionNumber, styles.nutCalories]}>
-                    {calories}
-                  </Text>
-                  <Text style={styles.nutritionLabel}>Calories</Text>
-                </View>
-              )}
-              {protein !== null && (
-                <View style={styles.nutritionItem}>
-                  <Text style={[styles.nutritionNumber, styles.nutProtein]}>
-                    {protein}g
-                  </Text>
-                  <Text style={styles.nutritionLabel}>Protein</Text>
-                </View>
-              )}
-              {carbs !== null && (
-                <View style={styles.nutritionItem}>
-                  <Text style={styles.nutritionNumber}>{carbs}g</Text>
-                  <Text style={styles.nutritionLabel}>Carbs</Text>
-                </View>
-              )}
-              {fat !== null && (
-                <View style={styles.nutritionItem}>
-                  <Text style={styles.nutritionNumber}>{fat}g</Text>
-                  <Text style={styles.nutritionLabel}>Fats</Text>
-                </View>
-              )}
-            </View>
+          <View style={styles.nutritionRow}>
+            {calories !== null && (
+              <View style={styles.nutritionItem}>
+                <Text style={[styles.nutritionNumber, styles.nutCalories]}>
+                  {calories}
+                </Text>
+                <Text style={styles.nutritionLabel}>Calories</Text>
+              </View>
+            )}
+            {protein !== null && (
+              <View style={styles.nutritionItem}>
+                <Text style={[styles.nutritionNumber, styles.nutProtein]}>
+                  {protein}g
+                </Text>
+                <Text style={styles.nutritionLabel}>Protein</Text>
+              </View>
+            )}
+            {carbs !== null && (
+              <View style={styles.nutritionItem}>
+                <Text style={styles.nutritionNumber}>{carbs}g</Text>
+                <Text style={styles.nutritionLabel}>Carbs</Text>
+              </View>
+            )}
+            {fat !== null && (
+              <View style={styles.nutritionItem}>
+                <Text style={styles.nutritionNumber}>{fat}g</Text>
+                <Text style={styles.nutritionLabel}>Fats</Text>
+              </View>
+            )}
           </View>
-        )}
+        </View>
+      )}
 
       {/* Ingredientes + Instrucciones (tarjetas) */}
       <View style={styles.bottomRow}>
@@ -171,24 +203,32 @@ export default function RecipeDetailScreen() {
           {ingredients.map((ing, index) => {
             const name =
               ing.name ||
-              ing.ingredient_name ||
+              (ing as any).ingredient_name ||
               `Ingrediente ${index + 1}`;
 
             const qty =
-              ing.pivot?.quantity ??
-              ing.quantity ??
-              ing.pivot?.grams ??
+              (ing as any).pivot?.quantity ??
+              (ing as any).quantity ??
+              (ing as any).pivot?.grams ??
               null;
             const unit =
-              ing.pivot?.unit ??
-              ing.unit ??
-              (ing.pivot?.grams ? "g" : "");
+              (ing as any).pivot?.unit ??
+              (ing as any).unit ??
+              ((ing as any).pivot?.grams ? "g" : "");
+
+            const qtyText =
+              qty != null
+                ? typeof qty === "number"
+                  ? qty % 1 === 0
+                    ? String(qty)
+                    : qty.toFixed(2)
+                  : String(qty)
+                : null;
 
             return (
               <Text key={ing.id ?? index} style={styles.bottomText}>
-                {qty != null
-                  ? `${qty.toFixed ? qty.toFixed(2) : qty}${unit ? ` ${unit}` : ""
-                  } – ${name}`
+                {qtyText
+                  ? `${qtyText}${unit ? ` ${unit}` : ""} – ${name}`
                   : name}
               </Text>
             );
@@ -209,6 +249,24 @@ export default function RecipeDetailScreen() {
           ))}
         </View>
       </View>
+
+      {/* Botón DELETE */}
+      <TouchableOpacity
+        onPress={() => setShowDeleteModal(true)}
+        style={styles.deleteButton}
+        activeOpacity={0.8}
+      >
+        <Text style={styles.deleteButtonText}>Delete</Text>
+      </TouchableOpacity>
+
+      {/* Modal de confirmación */}
+      <ConfirmModal
+        visible={showDeleteModal}
+        title="Delete Recipe"
+        message="Are you sure you want to delete this recipe? This action cannot be undone."
+        onCancel={() => setShowDeleteModal(false)}
+        onConfirm={handleDelete}
+      />
     </ScrollView>
   );
 }
@@ -259,7 +317,7 @@ const styles = StyleSheet.create({
     color: COLORS.textPrimary,
   },
   nutritionCard: {
-    backgroundColor: "#FDF8F3", // crema muy suave
+    backgroundColor: "#FDF8F3",
     borderRadius: 16,
     paddingHorizontal: 16,
     paddingVertical: 14,
@@ -328,5 +386,17 @@ const styles = StyleSheet.create({
   bottomTextMuted: {
     fontSize: 14,
     color: COLORS.textSecondary,
+  },
+  deleteButton: {
+    backgroundColor: "#dc2626",
+    paddingVertical: 10,
+    borderRadius: 10,
+    marginTop: 12,
+    width: "100%",
+    alignItems: "center",
+  },
+  deleteButtonText: {
+    color: "white",
+    fontWeight: "600",
   },
 });

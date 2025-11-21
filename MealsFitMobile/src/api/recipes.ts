@@ -76,12 +76,16 @@ export type CreateRecipeInput = {
 };
 
 export async function createRecipe(input: CreateRecipeInput) {
-  // En Laravel: Route::apiResource('recipes', RecipeController::class)->store
-  // y en el controlador validás estos campos como hacés desde web.
   const res = await apiFetch<any>("/recipes", {
     method: "POST",
     body: JSON.stringify(input),
   });
 
   return res;
+}
+
+export async function deleteRecipe(id: number): Promise<void> {
+  await apiFetch(`/recipes/${id}`, {
+    method: "DELETE",
+  });
 }
