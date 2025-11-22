@@ -47,7 +47,6 @@ export function TopBar({ onLogout }: { onLogout: () => Promise<void> }) {
                 </View>
             </View>
 
-            {/* MENU */}
             {open && (
                 <View style={styles.menuCard}>
                     <Text style={styles.menuTitle}>Navigation</Text>

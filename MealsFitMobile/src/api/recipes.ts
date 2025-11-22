@@ -46,6 +46,7 @@ export async function listMyRecipes(userId?: number): Promise<Recipe[]> {
     method: "GET",
   });
 
+  //Dejamos console.log para futuros testeos
   // console.log("API /recipes RESPONSE:", res);
 
   const all = res.data ?? [];
@@ -57,7 +58,7 @@ export async function getRecipe(id: number): Promise<Recipe> {
   return apiFetch<Recipe>(`/recipes/${id}`, { method: "GET" });
 }
 
-// ---------- CREATE RECIPE ----------
+// Create Recipe
 
 export type CreateRecipeInput = {
   title: string;

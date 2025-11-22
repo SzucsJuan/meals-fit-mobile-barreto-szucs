@@ -93,7 +93,6 @@ export default function RecipeDetailScreen() {
       // Llamamos a la función de la API
       await deleteRecipe(recipe.id);
 
-      // Refrescamos el listado de recetas
       queryClient.invalidateQueries({ queryKey: ["my-recipes"] });
 
       Alert.alert("Deleted", "Recipe deleted successfully.");
@@ -119,7 +118,6 @@ export default function RecipeDetailScreen() {
         />
       )}
 
-      {/* Header info (título, descripción, meta) */}
       <View style={styles.headerRow}>
         <View style={{ flex: 1 }}>
           <Text style={styles.title}>{recipe.title}</Text>
@@ -146,7 +144,6 @@ export default function RecipeDetailScreen() {
         )}
       </View>
 
-      {/* Nutrition Information */}
       {(calories !== null ||
         protein !== null ||
         carbs !== null ||
@@ -191,7 +188,6 @@ export default function RecipeDetailScreen() {
         </View>
       )}
 
-      {/* Ingredientes + Instrucciones (tarjetas) */}
       <View style={styles.bottomRow}>
         <View style={styles.bottomCard}>
           <Text style={styles.bottomTitle}>Ingredients</Text>
@@ -250,7 +246,6 @@ export default function RecipeDetailScreen() {
         </View>
       </View>
 
-      {/* Botón DELETE */}
       <TouchableOpacity
         onPress={() => setShowDeleteModal(true)}
         style={styles.deleteButton}
@@ -259,7 +254,6 @@ export default function RecipeDetailScreen() {
         <Text style={styles.deleteButtonText}>Delete</Text>
       </TouchableOpacity>
 
-      {/* Modal de confirmación */}
       <ConfirmModal
         visible={showDeleteModal}
         title="Delete Recipe"

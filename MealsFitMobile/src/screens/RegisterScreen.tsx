@@ -1,4 +1,3 @@
-// src/screens/RegisterScreen.tsx
 import React, { useState } from "react";
 import {
   View,
@@ -100,7 +99,6 @@ export default function RegisterScreen() {
         <View style={styles.root}>
           <View style={styles.centerWrapper}>
             <View style={styles.card}>
-              {/* Encabezado */}
               <View style={styles.header}>
                 <Image source={logo} style={styles.logo} />
                 <Text style={styles.title}>Create your account</Text>
@@ -112,7 +110,6 @@ export default function RegisterScreen() {
                 </View>
               </View>
 
-              {/* Formulario */}
               <View style={styles.form}>
                 <Text style={styles.sectionTitle}>Get started for free</Text>
 

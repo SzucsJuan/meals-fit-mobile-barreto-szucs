@@ -76,7 +76,6 @@ export default function LoginScreen() {
         <View style={styles.root}>
           <View style={styles.centerWrapper}>
             <View style={styles.card}>
-              {/* encabezado */}
               <View style={styles.header}>
                 <Image source={logo} style={styles.logo} />
                 <Text style={styles.title}>Sign in to Meals&Fit</Text>
@@ -88,7 +87,6 @@ export default function LoginScreen() {
                 </View>
               </View>
 
-              {/* formulario */}
               <View style={styles.form}>
                 <Text style={styles.label}>Email</Text>
                 <TextInput

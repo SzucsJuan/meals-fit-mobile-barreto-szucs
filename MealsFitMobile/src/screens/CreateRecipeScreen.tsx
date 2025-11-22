@@ -53,7 +53,7 @@ export default function CreateRecipeScreen() {
     const navigation = useNavigation<Nav>();
     const queryClient = useQueryClient();
 
-    // ==== Info básica ====
+    // Info básica de la receta
     const [title, setTitle] = useState("");
     const [visibility, setVisibility] = useState<"public" | "private">("public");
     const [description, setDescription] = useState("");
@@ -61,7 +61,7 @@ export default function CreateRecipeScreen() {
     const [cookTime, setCookTime] = useState("");
     const [servings, setServings] = useState("");
 
-    // ==== Ingredientes dinámicos ====
+    // Ingredientes
     const [ingredients, setIngredients] = useState<IngredientRow[]>([
         {
             id: "ing-1",
@@ -75,16 +75,13 @@ export default function CreateRecipeScreen() {
         null
     );
 
-    // ==== Pasos ====
     const [steps, setSteps] = useState<StepRow[]>([{ id: "step-1", text: "" }]);
 
     const [image, setImage] = useState<string | null>(null);
     const [imageError, setImageError] = useState<string | null>(null);
 
-    // ==== Errores de form ====
     const [formError, setFormError] = useState<string | null>(null);
 
-    // ==== Ingredientes desde backend ====
     const {
         data: ingredientOptions = [],
         isLoading: loadingIngredients,
@@ -94,11 +91,10 @@ export default function CreateRecipeScreen() {
         queryFn: listIngredients,
     });
 
-    // ==== MUTATION: create recipe ====
     const createMutation = useMutation({
         mutationFn: (input: CreateRecipeInput) => createRecipe(input),
         onSuccess: () => {
-            // Refrescamos lista de recetas
+            // Se refresca la lista de recetas
             queryClient.invalidateQueries({ queryKey: ["my-recipes"] });
             navigation.goBack();
         },
@@ -124,7 +120,7 @@ export default function CreateRecipeScreen() {
         navigation.goBack();
     };
 
-    // ---- Helpers ingredientes ----
+    // Helper para ingredientes
     const addIngredientRow = () => {
         setIngredients((prev) => [
             ...prev,
@@ -170,7 +166,7 @@ export default function CreateRecipeScreen() {
         return unitLabel ? `${ing.name} (${unitLabel})` : ing.name;
     };
 
-    // ---- Helpers pasos ----
+    // Helper para los steps
     const addStepRow = () => {
         setSteps((prev) => [
             ...prev,
@@ -209,7 +205,7 @@ export default function CreateRecipeScreen() {
         }
     }
 
-    // ---- Guardar receta (llama al endpoint) ----
+    // Se llama al endpoint y se guarda receta
     const saveRecipe = async () => {
         setFormError(null);
 
@@ -226,7 +222,7 @@ export default function CreateRecipeScreen() {
         const stepsString = stepsText.join("\n");
 
         const ingForPayload = ingredients
-            .filter((r) => r.ingredientId) // por las dudas
+            .filter((r) => r.ingredientId)
             .map((r) => ({
                 ingredient_id: r.ingredientId as number,
                 quantity: Number(r.quantity) || 0,
@@ -256,7 +252,6 @@ export default function CreateRecipeScreen() {
             const created = await createRecipe(payload);
             console.log("RECETA CREADA RAW:", created);
 
-            // soportar respuestas tipo {id: 1}, {recipe: {...}}, {data: {...}}
             const recipeId =
                 created?.id ??
                 created?.recipe?.id ??
@@ -266,13 +261,11 @@ export default function CreateRecipeScreen() {
             if (!recipeId) {
                 console.log("No pude obtener recipeId de la respuesta:", created);
                 alert("La receta se creó pero no pude subir la imagen (sin ID).");
-                // invalidamos igualmente la lista y volvemos
                 queryClient.invalidateQueries({ queryKey: ["my-recipes"] });
                 navigation.goBack();
                 return;
             }
 
-            // Si hay imagen → subir imagen
             if (image) {
                 const token = useAuth.getState().token;
                 const formData = new FormData();
@@ -293,7 +286,6 @@ export default function CreateRecipeScreen() {
                     method: "POST",
                     headers: {
                         Authorization: `Bearer ${useAuth.getState().token}`,
-                        // NO pongas Content-Type, fetch lo arma con boundary para multipart
                     },
                     body: formData,
                 });
@@ -308,12 +300,10 @@ export default function CreateRecipeScreen() {
 
                 if (!uploadResp.ok) {
                     console.log("ERROR SUBIENDO IMAGEN", text);
-                    // no cortamos el flujo, solo avisamos
                     alert("La receta se creó pero hubo un error al subir la imagen.");
                 }
             }
 
-            // refrescamos lista y volvemos
             queryClient.invalidateQueries({ queryKey: ["my-recipes"] });
             alert("Receta creada correctamente.");
             navigation.goBack();
@@ -328,10 +318,8 @@ export default function CreateRecipeScreen() {
     return (
         <SafeAreaView style={styles.safeArea}>
             <View style={styles.container}>
-                {/* Navbar con hamburguesa */}
                 <TopBar onLogout={handleLogout} />
 
-                {/* Flecha volver */}
                 <TouchableOpacity
                     style={styles.backRow}
                     onPress={handleBack}
@@ -346,7 +334,6 @@ export default function CreateRecipeScreen() {
                     contentContainerStyle={{ paddingBottom: 40 }}
                     showsVerticalScrollIndicator={false}
                 >
-                    {/* ========= INFO BÁSICA ========= */}
                     <View style={styles.card}>
                         <View style={styles.cardHeaderRow}>
                             <Text style={styles.cardTitle}>Recipe</Text>
@@ -449,7 +436,7 @@ export default function CreateRecipeScreen() {
                         </View>
                     </View>
 
-                    {/* ========= INGREDIENTES ========= */}
+                    {/* Ingredientes */}
                     <View style={styles.card}>
                         <View style={styles.cardHeaderRow}>
                             <View>
@@ -475,7 +462,6 @@ export default function CreateRecipeScreen() {
 
                         {ingredients.map((row, index) => (
                             <View key={row.id} style={styles.ingredientBlock}>
-                                {/* SELECTOR DE INGREDIENTE */}
                                 <Text style={styles.labelSmall}>
                                     Ingredient {index + 1}
                                 </Text>
@@ -500,7 +486,6 @@ export default function CreateRecipeScreen() {
                                     </Text>
                                 </TouchableOpacity>
 
-                                {/* Dropdown */}
                                 {openIngredientRowId === row.id && (
                                     <View style={styles.selectDropdown}>
                                         {loadingIngredients && (
@@ -538,7 +523,6 @@ export default function CreateRecipeScreen() {
                                     </View>
                                 )}
 
-                                {/* Quantity + Unit */}
                                 <View style={styles.row2}>
                                     <View style={styles.col2}>
                                         <Text style={styles.labelSmall}>Quantity</Text>
@@ -592,7 +576,7 @@ export default function CreateRecipeScreen() {
                         ))}
                     </View>
 
-                    {/* ========= INSTRUCCIONES ========= */}
+                    {/* Instrucciones */}
                     <View style={styles.card}>
                         <View style={styles.cardHeaderRow}>
                             <View>
@@ -636,7 +620,7 @@ export default function CreateRecipeScreen() {
                         ))}
                     </View>
 
-                    {/* ========= IMAGEN ========= */}
+                    {/* Imagen */}
                     <View style={{ marginTop: 20 }}>
                         <Text style={{ color: COLORS.textSecondary, marginBottom: 6 }}>Recipe Image</Text>
 
@@ -671,7 +655,6 @@ export default function CreateRecipeScreen() {
                         {imageError && <Text style={{ color: COLORS.textSecondary }}>{imageError}</Text>}
                     </View>
 
-                    {/* ========= ERROR FORM + BOTÓN GUARDAR ========= */}
                     {formError && (
                         <Text style={[styles.errorText, { marginBottom: 8 }]}>
                             {formError}
@@ -873,7 +856,6 @@ const styles = StyleSheet.create({
         marginBottom: 8,
     },
 
-    // select de ingrediente
     selectInput: {
         borderWidth: 1,
         borderColor: COLORS.border,
@@ -916,7 +898,6 @@ const styles = StyleSheet.create({
         color: COLORS.textPrimary,
     },
 
-    // pasos
     stepBlock: {
         marginTop: 8,
         paddingTop: 6,
@@ -950,7 +931,6 @@ const styles = StyleSheet.create({
         color: "#DC2626",
     },
 
-    // imagen
     imageRow: {
         flexDirection: "row",
         alignItems: "center",
@@ -991,7 +971,6 @@ const styles = StyleSheet.create({
         fontSize: 13,
     },
 
-    // guardar
     saveButton: {
         marginTop: 8,
         backgroundColor: COLORS.green,

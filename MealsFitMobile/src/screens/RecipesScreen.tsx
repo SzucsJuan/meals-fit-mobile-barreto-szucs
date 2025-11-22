@@ -18,7 +18,7 @@ import { API_BASE_URL } from "../config/env";
 import { logoutApi } from "../api/auth";
 
 const COLORS = {
-  bg: "#F8F5F0", // fondo crema claro
+  bg: "#F8F5F0",
   card: "#FFFFFF",
   border: "#E5E7EB",
   textPrimary: "#1F2937",
@@ -44,7 +44,6 @@ function resolveImageUrl(recipe: Recipe): string | undefined {
   return url;
 }
 
-/** Topbar con logo + usuario + botón hamburguesa */
 function TopBar(props: { onLogout: () => Promise<void> }) {
   const user = useAuth((s) => s.user);
   const [open, setOpen] = useState(false);
@@ -132,11 +131,10 @@ export default function RecipesScreen() {
 
   const handleLogout = async () => {
     try {
-      await logoutApi(); // limpia token + user en store
+      await logoutApi(); // limpiamos token
     } catch (e) {
       console.log("Logout error", e);
     }
-    // AppNavigator detecta token null y vuelve al Login
   };
 
   const { data, isLoading, isRefetching, error, refetch } = useQuery({
@@ -299,12 +297,11 @@ const styles = StyleSheet.create({
     paddingTop: 10,
   },
 
-  /** Top bar + menú hamburguesa */
   topBarWrapper: {
     position: "relative",
     marginBottom: 12,
     paddingTop: 8,
-    zIndex: 20, // que quede por encima de la lista
+    zIndex: 20,
   },
   topBar: {
     flexDirection: "row",
@@ -396,7 +393,6 @@ const styles = StyleSheet.create({
     marginVertical: 6,
   },
 
-  /** Títulos sección */
   headerTitle: {
     fontSize: 24,
     fontWeight: "700",
@@ -407,7 +403,6 @@ const styles = StyleSheet.create({
     marginBottom: 14,
   },
 
-  /** Listado tarjetas */
   center: {
     flex: 1,
     backgroundColor: COLORS.bg,

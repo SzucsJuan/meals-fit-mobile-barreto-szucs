@@ -1,4 +1,3 @@
-// src/api/ingredients.ts
 import { apiFetch } from "./client";
 
 export type IngredientOption = {

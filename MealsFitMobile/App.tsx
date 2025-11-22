@@ -14,7 +14,6 @@ export default function App() {
   }, [hydrate]);
 
   if (!hydrated) {
-    // Podés poner un splash más lindo si querés
     return null;
   }
 
