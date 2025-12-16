@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React from "react";
 import {
   View,
   Text,
@@ -13,19 +13,20 @@ import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 
 import { listMyRecipes, Recipe } from "../api/recipes";
 import { useAuth } from "../store/auth";
-import { AppStackParamList } from "../navigation/AppNavigator";
+import type { AppStackParamList } from "../navigation/AppNavigator";
 import { API_BASE_URL } from "../config/env";
 import { logoutApi } from "../api/auth";
+import { TopBar } from "../components/TopBar";
 
 const COLORS = {
-  bg: "#F8F5F0",
-  card: "#FFFFFF",
-  border: "#E5E7EB",
-  textPrimary: "#1F2937",
-  textSecondary: "#6B7280",
-  green: "#22C55E",
-  greenDark: "#16A34A",
-  iconGray: "#4B5563",
+  bg: "#020617",
+  card: "#0b1220",
+  border: "#1f2937",
+  textPrimary: "#e5e7eb",
+  textSecondary: "#94a3b8",
+  accent: "#FF9800",
+  danger: "#f97373",
+  chipBg: "#0f172a",
 };
 
 type Nav = NativeStackNavigationProp<AppStackParamList, "Recipes">;
@@ -34,6 +35,7 @@ function resolveImageUrl(recipe: Recipe): string | undefined {
   let url = recipe.image_thumb_url || recipe.image_url || recipe.image_webp_url;
   if (!url) return undefined;
 
+  // si backend devolvió localhost en storage link, lo reescribimos al base real
   if (url.includes("://localhost") || url.includes("://127.0.0.1")) {
     const idx = url.indexOf("/storage/");
     if (idx !== -1) {
@@ -44,96 +46,15 @@ function resolveImageUrl(recipe: Recipe): string | undefined {
   return url;
 }
 
-function TopBar(props: { onLogout: () => Promise<void> }) {
-  const user = useAuth((s) => s.user);
-  const [open, setOpen] = useState(false);
-  const logo = require("../../assets/icon.png");
-
-  const toggleMenu = () => setOpen((prev) => !prev);
-
-  return (
-    <View style={styles.topBarWrapper}>
-      <View style={styles.topBar}>
-        <View style={styles.brandRow}>
-          <Image source={logo} style={styles.brandLogo} />
-          <Text style={styles.brandText}>Meals&Fit</Text>
-        </View>
-
-        <View style={styles.topRight}>
-          {user && <Text style={styles.userName}>{user.name}</Text>}
-
-          <TouchableOpacity
-            onPress={toggleMenu}
-            style={styles.burgerButton}
-            activeOpacity={0.7}
-          >
-            <View style={styles.burgerLine} />
-            <View style={styles.burgerLine} />
-            <View style={styles.burgerLine} />
-          </TouchableOpacity>
-        </View>
-      </View>
-
-      {open && (
-        <View style={styles.menuCard}>
-          <TouchableOpacity
-            style={styles.menuItem}
-            onPress={() => setOpen(false)}
-          >
-            <Text style={styles.menuItemText}>Home</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            style={styles.menuItem}
-            onPress={() => setOpen(false)}
-          >
-            <Text style={styles.menuItemText}>Meals</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            style={[styles.menuItem, styles.menuItemActive]}
-            onPress={() => setOpen(false)}
-          >
-            <Text style={[styles.menuItemText, styles.menuItemActiveText]}>
-              My Recipes
-            </Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            style={styles.menuItem}
-            onPress={() => setOpen(false)}
-          >
-            <Text style={styles.menuItemText}>Discover</Text>
-          </TouchableOpacity>
-
-          <View style={styles.menuDivider} />
-
-          <TouchableOpacity
-            style={styles.menuItem}
-            onPress={async () => {
-              setOpen(false);
-              await props.onLogout();
-            }}
-          >
-            <Text style={[styles.menuItemText, { color: "#DC2626" }]}>
-              Logout
-            </Text>
-          </TouchableOpacity>
-        </View>
-      )}
-    </View>
-  );
-}
-
 export default function RecipesScreen() {
   const user = useAuth((s) => s.user);
   const navigation = useNavigation<Nav>();
 
   const handleLogout = async () => {
     try {
-      await logoutApi(); // limpiamos token
+      await logoutApi();
     } catch (e) {
-      console.log("Logout error", e);
+      // console.log("Logout error", e);
     }
   };
 
@@ -149,21 +70,13 @@ export default function RecipesScreen() {
     const img = resolveImageUrl(item);
 
     const calories =
-      item.calories !== undefined && item.calories !== null
-        ? Math.round(item.calories)
-        : null;
+      item.calories !== undefined && item.calories !== null ? Math.round(item.calories) : null;
     const protein =
-      item.protein !== undefined && item.protein !== null
-        ? Math.round(item.protein)
-        : null;
+      item.protein !== undefined && item.protein !== null ? Math.round(item.protein) : null;
     const carbs =
-      item.carbs !== undefined && item.carbs !== null
-        ? Math.round(item.carbs)
-        : null;
+      item.carbs !== undefined && item.carbs !== null ? Math.round(item.carbs) : null;
     const fat =
-      item.fat !== undefined && item.fat !== null
-        ? Math.round(item.fat)
-        : null;
+      item.fat !== undefined && item.fat !== null ? Math.round(item.fat) : null;
 
     return (
       <TouchableOpacity
@@ -171,63 +84,50 @@ export default function RecipesScreen() {
         onPress={() => navigation.navigate("RecipeDetail", { recipe: item })}
       >
         <View style={styles.card}>
-          {img && (
-            <Image
-              source={{ uri: img }}
-              style={styles.image}
-              resizeMode="cover"
-            />
+          {img ? (
+            <Image source={{ uri: img }} style={styles.image} resizeMode="cover" />
+          ) : (
+            <View style={styles.imagePlaceholder}>
+              <Text style={styles.imagePlaceholderText}>No image</Text>
+            </View>
           )}
 
           <View style={styles.cardContent}>
-            <Text style={styles.cardTitle}>{item.title}</Text>
-            {item.description && (
+            <Text style={styles.cardTitle} numberOfLines={1}>
+              {item.title}
+            </Text>
+
+            {item.description ? (
               <Text style={styles.cardSubtitle} numberOfLines={2}>
                 {item.description}
               </Text>
-            )}
+            ) : null}
 
             <View style={styles.metaRow}>
               {item.prep_time_minutes != null && (
-                <Text style={styles.metaText}>
-                  ⏱ {item.prep_time_minutes} min
-                </Text>
+                <View style={styles.metaChip}>
+                  <Text style={styles.metaText}>⏱ {item.prep_time_minutes} min</Text>
+                </View>
               )}
               {item.servings != null && (
-                <Text style={styles.metaText}>
-                  👥 {item.servings} servings
-                </Text>
+                <View style={styles.metaChip}>
+                  <Text style={styles.metaText}>👥 {item.servings} servings</Text>
+                </View>
               )}
             </View>
 
             <View style={styles.macrosRow}>
               {calories !== null && (
-                <View style={styles.macroItem}>
-                  <Text style={[styles.macroNumber, styles.macroCalories]}>
-                    {calories}
-                  </Text>
-                  <Text style={styles.macroLabel}>Calories</Text>
-                </View>
+                <Macro label="Calories" value={`${calories}`} />
               )}
               {protein !== null && (
-                <View style={styles.macroItem}>
-                  <Text style={[styles.macroNumber, styles.macroProtein]}>
-                    {protein}g
-                  </Text>
-                  <Text style={styles.macroLabel}>Protein</Text>
-                </View>
+                <Macro label="Protein" value={`${protein}g`} />
               )}
               {carbs !== null && (
-                <View style={styles.macroItem}>
-                  <Text style={styles.macroNumber}>{carbs}g</Text>
-                  <Text style={styles.macroLabel}>Carbs</Text>
-                </View>
+                <Macro label="Carbs" value={`${carbs}g`} />
               )}
               {fat !== null && (
-                <View style={styles.macroItem}>
-                  <Text style={styles.macroNumber}>{fat}g</Text>
-                  <Text style={styles.macroLabel}>Fats</Text>
-                </View>
+                <Macro label="Fats" value={`${fat}g`} />
               )}
             </View>
           </View>
@@ -244,163 +144,74 @@ export default function RecipesScreen() {
     );
   }
 
-  if (isLoading && !recipes.length) {
-    return (
-      <View style={styles.center}>
-        <Text style={styles.textSecondary}>Cargando tus recetas…</Text>
-      </View>
-    );
-  }
-
-  if (error) {
-    console.log("RECIPES ERROR:", error);
-    return (
-      <View style={styles.center}>
-        <Text style={styles.error}>Error cargando recetas.</Text>
-      </View>
-    );
-  }
-
   return (
-    <View style={styles.container}>
+    <View style={styles.root}>
       <TopBar onLogout={handleLogout} />
 
-      <Text style={styles.headerTitle}>My Recipes</Text>
-      <Text style={styles.headerSubtitle}>Manage your recipes</Text>
+      <View style={styles.header}>
+        <Text style={styles.headerTitle}>My Recipes</Text>
+        <Text style={styles.headerSubtitle}>Manage your recipes</Text>
+      </View>
+
+      {isLoading && !recipes.length ? (
+        <View style={styles.center}>
+          <Text style={styles.textSecondary}>Cargando tus recetas…</Text>
+        </View>
+      ) : error ? (
+        <View style={styles.center}>
+          <Text style={styles.error}>Error cargando recetas.</Text>
+        </View>
+      ) : (
+        <FlatList
+          data={recipes}
+          keyExtractor={(item) => String(item.id)}
+          renderItem={renderItem}
+          refreshing={isRefetching}
+          onRefresh={refetch}
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={{ paddingHorizontal: 12, paddingBottom: 110 }}
+        />
+      )}
 
       <TouchableOpacity
         style={styles.fab}
-        activeOpacity={0.8}
+        activeOpacity={0.85}
         onPress={() => navigation.navigate("CreateRecipe")}
       >
         <Text style={styles.fabPlus}>+</Text>
       </TouchableOpacity>
+    </View>
+  );
+}
 
-      <FlatList
-        data={recipes}
-        keyExtractor={(item) => String(item.id)}
-        renderItem={renderItem}
-        refreshing={isRefetching}
-        onRefresh={refetch}
-        showsVerticalScrollIndicator={false}
-        contentContainerStyle={{ paddingBottom: 32 }}
-      />
+function Macro({ label, value }: { label: string; value: string }) {
+  return (
+    <View style={styles.macroItem}>
+      <Text style={styles.macroNumber}>{value}</Text>
+      <Text style={styles.macroLabel}>{label}</Text>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
+  root: {
     flex: 1,
     backgroundColor: COLORS.bg,
-    paddingHorizontal: 16,
-    paddingTop: 10,
   },
 
-  topBarWrapper: {
-    position: "relative",
-    marginBottom: 12,
-    paddingTop: 8,
-    zIndex: 20,
+  header: {
+    paddingHorizontal: 12,
+    paddingTop: 6,
+    paddingBottom: 10,
   },
-  topBar: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-  },
-  brandRow: {
-    flexDirection: "row",
-    alignItems: "center",
-  },
-  brandLogo: {
-    width: 24,
-    height: 24,
-    borderRadius: 12,
-    marginRight: 6,
-  },
-  brandText: {
-    fontSize: 18,
-    fontWeight: "700",
-    color: COLORS.textPrimary,
-  },
-  topRight: {
-    flexDirection: "row",
-    alignItems: "center",
-  },
-  userName: {
-    fontSize: 13,
-    color: COLORS.textSecondary,
-    marginRight: 8,
-  },
-  burgerButton: {
-    width: 32,
-    height: 32,
-    borderRadius: 999,
-    borderWidth: 1,
-    borderColor: COLORS.border,
-    backgroundColor: COLORS.card,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  burgerLine: {
-    width: 16,
-    height: 2,
-    backgroundColor: COLORS.textPrimary,
-    marginVertical: 1,
-  },
-  menuCard: {
-    position: "absolute",
-    top: 44,
-    right: 0,
-    width: 190,
-    backgroundColor: COLORS.card,
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: COLORS.border,
-    paddingHorizontal: 10,
-    paddingVertical: 8,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 3 },
-    shadowOpacity: 0.15,
-    shadowRadius: 6,
-    elevation: 6,
-    zIndex: 30,
-  },
-  menuTitle: {
-    fontSize: 11,
-    color: COLORS.textSecondary,
-    marginBottom: 6,
-  },
-  menuItem: {
-    paddingVertical: 6,
-  },
-  menuItemText: {
-    fontSize: 14,
-    color: COLORS.textPrimary,
-  },
-  menuItemActive: {
-    backgroundColor: COLORS.green,
-    borderRadius: 999,
-    paddingHorizontal: 10,
-  },
-  menuItemActiveText: {
-    color: "#FFFFFF",
-    fontWeight: "600",
-  },
-  menuDivider: {
-    height: 1,
-    backgroundColor: COLORS.border,
-    marginVertical: 6,
-  },
-
   headerTitle: {
-    fontSize: 24,
-    fontWeight: "700",
+    fontSize: 22,
+    fontWeight: "900",
     color: COLORS.textPrimary,
   },
   headerSubtitle: {
     color: COLORS.textSecondary,
-    marginBottom: 14,
+    marginTop: 4,
   },
 
   center: {
@@ -408,78 +219,61 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.bg,
     justifyContent: "center",
     alignItems: "center",
+    padding: 16,
   },
-  textSecondary: {
-    color: COLORS.textSecondary,
-  },
-  error: {
-    color: "#DC2626",
-  },
+  textSecondary: { color: COLORS.textSecondary },
+  error: { color: COLORS.danger, fontWeight: "800" },
+
   card: {
     backgroundColor: COLORS.card,
     borderRadius: 16,
     borderWidth: 1,
     borderColor: COLORS.border,
-    marginBottom: 18,
+    marginBottom: 14,
     overflow: "hidden",
   },
-  image: {
+
+  image: { width: "100%", height: 180 },
+  imagePlaceholder: {
     width: "100%",
     height: 180,
+    backgroundColor: COLORS.chipBg,
+    borderBottomWidth: 1,
+    borderBottomColor: COLORS.border,
+    alignItems: "center",
+    justifyContent: "center",
   },
-  cardContent: {
-    paddingHorizontal: 14,
-    paddingVertical: 12,
+  imagePlaceholderText: { color: COLORS.textSecondary },
+
+  cardContent: { paddingHorizontal: 14, paddingVertical: 12 },
+  cardTitle: { fontSize: 18, fontWeight: "900", color: COLORS.textPrimary },
+  cardSubtitle: { fontSize: 14, color: COLORS.textSecondary, marginTop: 4 },
+
+  metaRow: { flexDirection: "row", flexWrap: "wrap", gap: 8, marginTop: 10 },
+  metaChip: {
+    backgroundColor: COLORS.chipBg,
+    borderWidth: 1,
+    borderColor: COLORS.border,
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderRadius: 999,
   },
-  cardTitle: {
-    fontSize: 18,
-    fontWeight: "700",
-    color: COLORS.textPrimary,
-  },
-  cardSubtitle: {
-    fontSize: 14,
-    color: COLORS.textSecondary,
-    marginTop: 2,
-  },
-  metaRow: {
-    flexDirection: "row",
-    gap: 16,
-    marginTop: 10,
-  },
-  metaText: {
-    color: COLORS.iconGray,
-    fontSize: 13,
-  },
+  metaText: { color: COLORS.textSecondary, fontSize: 12, fontWeight: "700" },
+
   macrosRow: {
     flexDirection: "row",
     justifyContent: "space-between",
     marginTop: 12,
+    gap: 10,
   },
-  macroItem: {
-    flex: 1,
-    alignItems: "center",
-  },
-  macroNumber: {
-    fontSize: 16,
-    fontWeight: "700",
-    color: COLORS.textPrimary,
-  },
-  macroCalories: {
-    color: COLORS.greenDark,
-  },
-  macroProtein: {
-    color: "#F59E0B",
-  },
-  macroLabel: {
-    fontSize: 12,
-    color: COLORS.textSecondary,
-    marginTop: 2,
-  },
+  macroItem: { flex: 1, alignItems: "center", paddingVertical: 8 },
+  macroNumber: { fontSize: 14, fontWeight: "900", color: COLORS.textPrimary },
+  macroLabel: { fontSize: 12, color: COLORS.textSecondary, marginTop: 2 },
 
   fab: {
     position: "absolute",
     bottom: 26,
-    right: 26,
+    right: 20,
     width: 60,
     height: 60,
     borderRadius: 30,
@@ -491,12 +285,11 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 4 },
     shadowRadius: 6,
     elevation: 8,
-    zIndex: 50,
   },
   fabPlus: {
     fontSize: 32,
-    color: "#FFF",
-    fontWeight: "700",
+    color: "#0b1220",
+    fontWeight: "900",
     marginTop: -2,
   },
 });

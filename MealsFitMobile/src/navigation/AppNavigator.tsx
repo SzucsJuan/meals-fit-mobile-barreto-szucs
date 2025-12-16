@@ -5,6 +5,7 @@ import { TouchableOpacity, Text } from "react-native";
 
 import LoginScreen from "../screens/LoginScreen";
 import RegisterScreen from "../screens/RegisterScreen";
+import HomeScreen from "../screens/HomeScreen";
 import RecipesScreen from "../screens/RecipesScreen";
 import RecipeDetailScreen from "../screens/RecipeDetailScreen";
 import CreateRecipeScreen from "../screens/CreateRecipeScreen";
@@ -18,6 +19,7 @@ export type AuthStackParamList = {
 };
 
 export type AppStackParamList = {
+  Home: undefined;
   Recipes: undefined;
   RecipeDetail: { recipe: Recipe };
   CreateRecipe: undefined;
@@ -61,6 +63,11 @@ function AppStackNavigator() {
         contentStyle: { backgroundColor: "#020617" },
       }}
     >
+      <AppStack.Screen
+        name="Home"
+        component={HomeScreen}
+        options={{ title: "Home" }}
+      />
       <AppStack.Screen
         name="Recipes"
         component={RecipesScreen}

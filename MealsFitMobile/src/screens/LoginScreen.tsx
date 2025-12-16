@@ -20,15 +20,15 @@ import type { AuthStackParamList } from "../navigation/AppNavigator";
 type Nav = NativeStackNavigationProp<AuthStackParamList, "Login">;
 
 const COLORS = {
-  bg: "#F8F5F0",
-  card: "#FFFFFF",
-  border: "#E5E7EB",
-  text: "#1F2937",
-  muted: "#6B7280",
-  error: "#DC2626",
+  bg: "#020617",
+  card: "#0b1220",
+  chipBg: "#0f172a",
+  border: "#1f2937",
+  text: "#e5e7eb",
+  muted: "#94a3b8",
+  error: "#f97373",
   primary: "#22C55E",
-  primaryDark: "#16A34A",
-  link: "#16A34A",
+  link: "#FF9800",
 };
 
 export default function LoginScreen() {
@@ -52,9 +52,9 @@ export default function LoginScreen() {
     setLoading(true);
     try {
       const user = await login(email.trim(), password);
-      console.log("Sign in OK", user);
+      // console.log("Sign in OK", user);
     } catch (e: any) {
-      console.error("SIGN IN FAILED", e);
+      // console.error("SIGN IN FAILED", e);
       setError(e.message || "Sign in error");
     } finally {
       setLoading(false);
@@ -63,27 +63,26 @@ export default function LoginScreen() {
 
   const disabled = loading || !email.trim() || !password;
 
-  const goToRegister = () => {
-    navigation.navigate("Register");
-  };
+  const goToRegister = () => navigation.navigate("Register");
 
   return (
-    <KeyboardAvoidingView
-      style={{ flex: 1 }}
-      behavior={Platform.OS === "ios" ? "padding" : undefined}
-    >
+    <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === "ios" ? "padding" : undefined}>
       <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
         <View style={styles.root}>
           <View style={styles.centerWrapper}>
             <View style={styles.card}>
               <View style={styles.header}>
-                <Image source={logo} style={styles.logo} />
-                <Text style={styles.title}>Sign in to Meals&Fit</Text>
-                <View style={styles.subtitleRow}>
-                  <Text style={styles.subtitle}>New here? </Text>
-                  <TouchableOpacity onPress={goToRegister}>
-                    <Text style={styles.link}>Create an account</Text>
-                  </TouchableOpacity>
+                <View style={styles.brandRow}>
+                  <Image source={logo} style={styles.logo} />
+                  <View style={{ flex: 1 }}>
+                    <Text style={styles.title}>Sign in to Meals&Fit</Text>
+                    <View style={styles.subtitleRow}>
+                      <Text style={styles.subtitle}>New here? </Text>
+                      <TouchableOpacity onPress={goToRegister} activeOpacity={0.8}>
+                        <Text style={styles.link}>Create an account</Text>
+                      </TouchableOpacity>
+                    </View>
+                  </View>
                 </View>
               </View>
 
@@ -101,7 +100,7 @@ export default function LoginScreen() {
                   returnKeyType="next"
                 />
 
-                <Text style={[styles.label, { marginTop: 16 }]}>Password</Text>
+                <Text style={[styles.label, { marginTop: 14 }]}>Password</Text>
                 <TextInput
                   style={styles.input}
                   placeholder="••••••••"
@@ -119,19 +118,14 @@ export default function LoginScreen() {
                   style={[styles.button, disabled && styles.buttonDisabled]}
                   onPress={onSubmit}
                   disabled={disabled}
+                  activeOpacity={0.9}
                 >
-                  {loading ? (
-                    <ActivityIndicator color="#FFFFFF" />
-                  ) : (
-                    <Text style={styles.buttonText}>Sign in</Text>
-                  )}
+                  {loading ? <ActivityIndicator color="#0b1220" /> : <Text style={styles.buttonText}>Sign in</Text>}
                 </TouchableOpacity>
               </View>
             </View>
 
-            <Text style={styles.footerText}>
-              Meals&Fit · Nutrition and smart tracking
-            </Text>
+            <Text style={styles.footerText}>Meals&Fit · Nutrition and smart tracking</Text>
           </View>
         </View>
       </TouchableWithoutFeedback>
@@ -140,16 +134,9 @@ export default function LoginScreen() {
 }
 
 const styles = StyleSheet.create({
-  root: {
-    flex: 1,
-    backgroundColor: COLORS.bg,
-    paddingHorizontal: 24,
-  },
-  centerWrapper: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-  },
+  root: { flex: 1, backgroundColor: COLORS.bg, paddingHorizontal: 24 },
+  centerWrapper: { flex: 1, justifyContent: "center", alignItems: "center" },
+
   card: {
     width: "100%",
     maxWidth: 420,
@@ -158,79 +145,45 @@ const styles = StyleSheet.create({
     borderColor: COLORS.border,
     backgroundColor: COLORS.card,
     paddingHorizontal: 20,
-    paddingVertical: 24,
+    paddingVertical: 20,
   },
-  header: {
-    alignItems: "flex-start",
-    marginBottom: 16,
-  },
-  logo: {
-    width: 48,
-    height: 48,
-    borderRadius: 12,
-    marginBottom: 12,
-  },
-  title: {
-    fontSize: 22,
-    fontWeight: "700",
-    color: COLORS.text,
-    marginBottom: 4,
-  },
-  subtitleRow: {
-    flexDirection: "row",
-    alignItems: "center",
-  },
-  subtitle: {
-    fontSize: 13,
-    color: COLORS.muted,
-  },
-  link: {
-    fontSize: 13,
-    color: COLORS.link,
-    fontWeight: "600",
-  },
-  form: {
-    marginTop: 8,
-  },
-  label: {
-    fontSize: 13,
-    color: COLORS.text,
-    marginBottom: 6,
-  },
+
+  header: { marginBottom: 12 },
+  brandRow: { flexDirection: "row", alignItems: "center", gap: 12 },
+
+  logo: { width: 48, height: 48, borderRadius: 12 },
+
+  title: { fontSize: 22, fontWeight: "900", color: COLORS.text, marginBottom: 4 },
+  subtitleRow: { flexDirection: "row", alignItems: "center", flexWrap: "wrap" },
+  subtitle: { fontSize: 13, color: COLORS.muted },
+  link: { fontSize: 13, color: COLORS.link, fontWeight: "800" },
+
+  form: { marginTop: 6 },
+
+  label: { fontSize: 13, color: COLORS.text, marginBottom: 6, fontWeight: "800" },
+
   input: {
     borderWidth: 1,
     borderColor: COLORS.border,
-    borderRadius: 10,
+    borderRadius: 12,
     paddingHorizontal: 12,
     paddingVertical: 10,
     color: COLORS.text,
-    backgroundColor: "#FFFFFF",
+    backgroundColor: COLORS.chipBg,
     fontSize: 14,
   },
-  error: {
-    color: COLORS.error,
-    marginTop: 10,
-    fontSize: 13,
-  },
+
+  error: { color: COLORS.error, marginTop: 10, fontSize: 13, fontWeight: "800" },
+
   button: {
-    marginTop: 20,
-    borderRadius: 10,
-    paddingVertical: 11,
+    marginTop: 18,
+    borderRadius: 12,
+    paddingVertical: 12,
     alignItems: "center",
     backgroundColor: COLORS.primary,
   },
-  buttonDisabled: {
-    opacity: 0.7,
-  },
-  buttonText: {
-    color: "#FFFFFF",
-    fontWeight: "700",
-    fontSize: 15,
-  },
-  footerText: {
-    marginTop: 16,
-    fontSize: 11,
-    color: COLORS.muted,
-    textAlign: "center",
-  },
+  buttonDisabled: { opacity: 0.7 },
+  buttonText: { color: "#0b1220", fontWeight: "900", fontSize: 15 },
+
+  footerText: { marginTop: 16, fontSize: 11, color: COLORS.muted, textAlign: "center" },
 });

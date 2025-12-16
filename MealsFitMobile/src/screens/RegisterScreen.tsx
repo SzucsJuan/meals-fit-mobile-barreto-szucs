@@ -20,15 +20,15 @@ import type { AuthStackParamList } from "../navigation/AppNavigator";
 type Nav = NativeStackNavigationProp<AuthStackParamList, "Register">;
 
 const COLORS = {
-  bg: "#F8F5F0", 
-  card: "#FFFFFF",
-  border: "#E5E7EB",
-  text: "#1F2937",
-  muted: "#6B7280",
-  error: "#DC2626",
+  bg: "#020617",
+  card: "#0b1220",
+  chipBg: "#0f172a",
+  border: "#1f2937",
+  text: "#e5e7eb",
+  muted: "#94a3b8",
+  error: "#f97373",
   primary: "#22C55E",
-  primaryDark: "#16A34A",
-  link: "#16A34A",
+  link: "#FF9800",
 };
 
 export default function RegisterScreen() {
@@ -73,47 +73,42 @@ export default function RegisterScreen() {
       navigation.navigate("Login");
     } catch (e: any) {
       console.error("REGISTER FAILED", e);
-      const msg =
-        e?.message ||
-        e?.response?.data?.message ||
-        "Error creating account. Please try again.";
+      const msg = e?.message || e?.response?.data?.message || "Error creating account. Please try again.";
       setError(msg);
     } finally {
       setLoading(false);
     }
   };
 
-  const disabled =
-    loading || !name.trim() || !email.trim() || !password || !password2;
+  const disabled = loading || !name.trim() || !email.trim() || !password || !password2;
 
-  const goToLogin = () => {
-    navigation.navigate("Login");
-  };
+  const goToLogin = () => navigation.navigate("Login");
 
   return (
-    <KeyboardAvoidingView
-      style={{ flex: 1 }}
-      behavior={Platform.OS === "ios" ? "padding" : undefined}
-    >
+    <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === "ios" ? "padding" : undefined}>
       <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
         <View style={styles.root}>
           <View style={styles.centerWrapper}>
             <View style={styles.card}>
               <View style={styles.header}>
-                <Image source={logo} style={styles.logo} />
-                <Text style={styles.title}>Create your account</Text>
-                <View style={styles.subtitleRow}>
-                  <Text style={styles.subtitle}>Already have an account? </Text>
-                  <TouchableOpacity onPress={goToLogin}>
-                    <Text style={styles.link}>Sign in</Text>
-                  </TouchableOpacity>
+                <View style={styles.brandRow}>
+                  <Image source={logo} style={styles.logo} />
+                  <View style={{ flex: 1 }}>
+                    <Text style={styles.title}>Create your account</Text>
+                    <View style={styles.subtitleRow}>
+                      <Text style={styles.subtitle}>Already have an account? </Text>
+                      <TouchableOpacity onPress={goToLogin} activeOpacity={0.8}>
+                        <Text style={styles.link}>Sign in</Text>
+                      </TouchableOpacity>
+                    </View>
+                  </View>
                 </View>
               </View>
 
               <View style={styles.form}>
                 <Text style={styles.sectionTitle}>Get started for free</Text>
 
-                <Text style={[styles.label, { marginTop: 16 }]}>Full name</Text>
+                <Text style={[styles.label, { marginTop: 14 }]}>Full name</Text>
                 <TextInput
                   style={styles.input}
                   placeholder="Your name"
@@ -146,13 +141,9 @@ export default function RegisterScreen() {
                   onChangeText={setPassword}
                   returnKeyType="next"
                 />
-                <Text style={styles.helperText}>
-                  Must be at least 8 characters long.
-                </Text>
+                <Text style={styles.helperText}>Must be at least 8 characters long.</Text>
 
-                <Text style={[styles.label, { marginTop: 12 }]}>
-                  Confirm password
-                </Text>
+                <Text style={[styles.label, { marginTop: 10 }]}>Confirm password</Text>
                 <TextInput
                   style={styles.input}
                   placeholder="Confirm your password"
@@ -171,20 +162,16 @@ export default function RegisterScreen() {
                   style={[styles.button, disabled && styles.buttonDisabled]}
                   onPress={onSubmit}
                   disabled={disabled}
+                  activeOpacity={0.9}
                 >
-                  {loading ? (
-                    <ActivityIndicator color="#FFFFFF" />
-                  ) : (
-                    <Text style={styles.buttonText}>Create account</Text>
-                  )}
+                  {loading ? <ActivityIndicator color="#0b1220" /> : <Text style={styles.buttonText}>Create account</Text>}
                 </TouchableOpacity>
               </View>
             </View>
 
             <Text style={styles.footerText}>
-              By creating an account, you agree to our{" "}
-              <Text style={styles.link}>Terms of Service</Text> and{" "}
-              <Text style={styles.link}>Privacy Policy</Text>.
+              By creating an account, you agree to our <Text style={styles.link}>Terms</Text> and{" "}
+              <Text style={styles.link}>Privacy</Text>.
             </Text>
           </View>
         </View>
@@ -194,16 +181,9 @@ export default function RegisterScreen() {
 }
 
 const styles = StyleSheet.create({
-  root: {
-    flex: 1,
-    backgroundColor: COLORS.bg,
-    paddingHorizontal: 24,
-  },
-  centerWrapper: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-  },
+  root: { flex: 1, backgroundColor: COLORS.bg, paddingHorizontal: 24 },
+  centerWrapper: { flex: 1, justifyContent: "center", alignItems: "center" },
+
   card: {
     width: "100%",
     maxWidth: 420,
@@ -212,91 +192,54 @@ const styles = StyleSheet.create({
     borderColor: COLORS.border,
     backgroundColor: COLORS.card,
     paddingHorizontal: 20,
-    paddingVertical: 24,
+    paddingVertical: 20,
   },
-  header: {
-    alignItems: "flex-start",
-    marginBottom: 16,
-  },
-  logo: {
-    width: 48,
-    height: 48,
-    borderRadius: 12,
-    marginBottom: 12,
-  },
-  title: {
-    fontSize: 22,
-    fontWeight: "700",
-    color: COLORS.text,
-    marginBottom: 4,
-  },
-  subtitleRow: {
-    flexDirection: "row",
-    alignItems: "center",
-  },
-  subtitle: {
-    fontSize: 13,
-    color: COLORS.muted,
-  },
-  link: {
-    fontSize: 13,
-    color: COLORS.link,
-    fontWeight: "600",
-  },
-  form: {
-    marginTop: 4,
-  },
-  sectionTitle: {
-    fontSize: 15,
-    fontWeight: "600",
-    color: COLORS.text,
-    marginBottom: 4,
-  },
-  label: {
-    fontSize: 13,
-    color: COLORS.text,
-    marginBottom: 4,
-  },
+
+  header: { marginBottom: 12 },
+  brandRow: { flexDirection: "row", alignItems: "center", gap: 12 },
+  logo: { width: 48, height: 48, borderRadius: 12 },
+
+  title: { fontSize: 22, fontWeight: "900", color: COLORS.text, marginBottom: 4 },
+  subtitleRow: { flexDirection: "row", alignItems: "center", flexWrap: "wrap" },
+  subtitle: { fontSize: 13, color: COLORS.muted },
+  link: { fontSize: 13, color: COLORS.link, fontWeight: "800" },
+
+  form: { marginTop: 6 },
+  sectionTitle: { fontSize: 15, fontWeight: "900", color: COLORS.text, marginBottom: 4 },
+
+  label: { fontSize: 13, color: COLORS.text, marginBottom: 6, fontWeight: "800" },
+
   input: {
     borderWidth: 1,
     borderColor: COLORS.border,
-    borderRadius: 10,
+    borderRadius: 12,
     paddingHorizontal: 12,
     paddingVertical: 10,
     color: COLORS.text,
-    backgroundColor: "#FFFFFF",
+    backgroundColor: COLORS.chipBg,
     fontSize: 14,
   },
-  helperText: {
-    fontSize: 11,
-    color: COLORS.muted,
-    marginTop: 4,
-  },
-  error: {
-    color: COLORS.error,
-    marginTop: 10,
-    fontSize: 13,
-  },
+
+  helperText: { fontSize: 11, color: COLORS.muted, marginTop: 6 },
+
+  error: { color: COLORS.error, marginTop: 10, fontSize: 13, fontWeight: "800" },
+
   button: {
-    marginTop: 20,
-    borderRadius: 10,
+    marginTop: 18,
+    borderRadius: 12,
     paddingVertical: 12,
     alignItems: "center",
     backgroundColor: COLORS.primary,
   },
-  buttonDisabled: {
-    opacity: 0.7,
-  },
-  buttonText: {
-    color: "#FFFFFF",
-    fontWeight: "700",
-    fontSize: 15,
-  },
+  buttonDisabled: { opacity: 0.7 },
+  buttonText: { color: "#0b1220", fontWeight: "900", fontSize: 15 },
+
   footerText: {
     marginTop: 16,
     fontSize: 11,
     color: COLORS.muted,
     textAlign: "center",
     maxWidth: 420,
+    lineHeight: 16,
   },
 });
